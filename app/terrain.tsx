@@ -24,7 +24,7 @@ function MetricChart({title,source,unit,color,values,activeMonth}:{title:string;
 }
 
 export function ChorvoqTerrain(){
-  const fallbackDates=Array.from({length:7},(_,yearOffset)=>Array.from({length:6},(_,monthOffset)=>({year:2020+yearOffset,month:5+monthOffset,s2:1}))).flat().filter(item=>item.year<2026||item.month<=7);
+  const fallbackDates=Array.from({length:6},(_,yearOffset)=>Array.from({length:6},(_,monthOffset)=>({year:2020+yearOffset,month:5+monthOffset,s2:1}))).flat();
   const canvasRef=useRef<HTMLCanvasElement>(null);
   const terrainLoader=useRef<(heightUrl:string,colorUrl:string)=>void>(()=>{});
   const reservoirId="chorvoq";
@@ -65,7 +65,7 @@ export function ChorvoqTerrain(){
 
   useEffect(()=>{
     const controller=new AbortController();setPlaying(false);setRasterError("");setAvailable(fallbackDates);
-    fetch(availabilityUrl,{signal:controller.signal}).then(response=>response.json()).then((data:Availability[])=>setAvailable(data.some(item=>item.s2>0)?data:fallbackDates)).catch(error=>{if(error.name!=="AbortError")setAvailable(fallbackDates)});
+    fetch(availabilityUrl,{signal:controller.signal}).then(response=>response.json()).then((data:Availability[])=>{const supported=data.filter(item=>item.year<=2025);setAvailable(supported.some(item=>item.s2>0)?supported:fallbackDates)}).catch(error=>{if(error.name!=="AbortError")setAvailable(fallbackDates)});
     return()=>controller.abort();
   },[reservoirId]);
 
